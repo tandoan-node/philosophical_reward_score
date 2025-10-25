@@ -33,7 +33,7 @@
 * Định nghĩa "ý kiến" người dùng (Triết học, Sâu sắc, Đa chiều).
 * System Instruction của Gemini
 * Đầu ra
-* Điểm số từ 0.0 đến 1.0 và giải thích.
+* Điểm số từ 0.0 đến 10.0 và giải thích.
 * JSON Schema (Structured Output)
 
 ### 🛠 Hướng dẫn Sử dụng (Chạy Ứng dụng)
