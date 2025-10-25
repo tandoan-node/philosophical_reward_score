@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="vi">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Mô Phỏng Mô Hình Thưởng (Reward Model)</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f9fc;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background-color: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+    </head>
+    <body class="p-4 sm:p-8">
+
+        <div class="container">
+            <!-- Tiêu đề -->
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Mô Phỏng Mô Hình
+                Thưởng (Reward Model)</h1>
+            <p class="text-gray-600 mb-6">Sử dụng Gemini 2.5 Flash để chấm điểm
+                ưu tiên của người dùng.</p>
+
+            <!-- Tiêu chí chấm điểm -->
+            <div class="bg-indigo-50 p-4 rounded-lg mb-6 shadow-inner">
+                <h2 class="text-lg font-semibold text-indigo-700 mb-2">Tiêu Chí
+                    Chấm Điểm (Ý kiến người dùng)</h2>
+                <p class="text-indigo-600 text-sm">Điểm thưởng (Score) sẽ cao
+                    nếu câu trả lời thể hiện tính **Triết học, Sâu sắc, và Tư
+                    duy Đa chiều** về chủ đề AI. Ngược lại, điểm sẽ thấp cho câu
+                    trả lời nông hoặc kỹ thuật.</p>
+            </div>
+
+            <!-- Vùng nhập liệu -->
+            <div class="mb-6">
+                <label for="responseTextarea"
+                    class="block text-sm font-medium text-gray-700 mb-2">Nhập
+                    Câu Trả Lời Cần Chấm Điểm (Prompt Triết học)</label>
+                <textarea id="responseTextarea" rows="6"
+                    class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150"
+                    placeholder="Ví dụ: Sự phát triển của AI đặt ra câu hỏi về bản chất của ý thức và liệu chúng ta có thể định nghĩa được linh hồn thông qua thuật toán hay không."></textarea>
+            </div>
+
+            <!-- Nút chấm điểm -->
+            <div class="flex justify-start">
+                <button id="scoreButton" onclick="getRewardScore()"
+                    class="flex items-center justify-center bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-700 transition duration-200 shadow-md">
+                    <span id="buttonText">Chấm Điểm Thưởng (Reward Score)</span>
+                    <div id="loader" class="loader hidden"></div>
+                </button>
+            </div>
+
+            <!-- Vùng kết quả -->
+            <div id="resultCard"
+                class="mt-8 p-6 bg-gray-100 rounded-lg hidden shadow-lg">
+                <h2
+                    class="text-xl font-bold text-gray-800 mb-3 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                        class="h-6 w-6 text-green-600 mr-2" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor"
+                        stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M11.015 12h1.468c.351 0 .685.16.903.433l2.8 3.5a1 1 0 010 1.134l-2.8 3.5A.999.999 0 0112.483 22h-1.468c-.351 0-.685-.16-.903-.433l-2.8-3.5a1 1 0 010-1.134l2.8-3.5c.218-.273.552-.433.903-.433zM7.172 6.5a1 1 0 010 1.414L3.75 11.5l3.422 3.586a1 1 0 010 1.414l-1.06 1.06a1 1 0 01-1.414 0L.75 12.207a1 1 0 010-1.414L4.698 7.06a1 1 0 011.414 0l1.06 1.06zM16.828 6.5a1 1 0 000 1.414L20.25 11.5l-3.422 3.586a1 1 0 000 1.414l1.06 1.06a1 1 0 001.414 0l3.948-3.947a1 1 0 000-1.414L19.302 7.06a1 1 0 00-1.414 0l-1.06 1.06z" />
+                    </svg>
+                    Kết Quả Chấm Điểm Thưởng
+                </h2>
+                <div class="text-sm">
+                    <p class="text-gray-700 mb-2"><strong>Điểm Thưởng (Reward
+                            Score):</strong> <span id="rewardScore"
+                            class="text-2xl font-extrabold text-blue-600 ml-2"></span></p>
+                    <p class="text-gray-700 mb-2"><strong>Giải thích của Model
+                            Thưởng:</strong></p>
+                    <p id="rewardExplanation"
+                        class="bg-white p-3 rounded-md border border-gray-200 text-gray-800 italic"></p>
+                </div>
+            </div>
+        </div>
+
+        <script>
+        const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=";
+        // API key sẽ được cung cấp tự động bởi Canvas, chúng ta chỉ cần để chuỗi rỗng
+        const apiKey = "AIzaSyB_-yrsHth9pL-MP--2hhUogYw1kARe2ek"; 
+        
+        // --- CẤU HÌNH HỆ THỐNG ĐỂ MODEL HOẠT ĐỘNG NHƯ REWARD MODEL ---
+        const systemPrompt = `
+            Bạn là một Mô hình Thưởng (Reward Model) chuyên biệt. Nhiệm vụ của bạn là đánh giá và chấm điểm một văn bản (user_response) dựa trên mức độ Triết học, Sâu sắc và Tư duy Đa chiều của nó.
+            
+            1. Đánh giá 'user_response' theo thang điểm **0.0 (rất nông/sai)** đến **10.0 (rất sâu sắc/triết học)**.
+            2. Trả về kết quả dưới dạng JSON có cấu trúc như sau:
+               {
+                 "score": [Điểm số từ 0.0 đến 10.0],
+                 "explanation": "[Giải thích ngắn gọn (bằng tiếng Việt) tại sao văn bản này xứng đáng với điểm số đó, dựa trên tiêu chí Triết học/Sâu sắc.]"
+               }
+            3. KHÔNG BAO GỒM bất kỳ văn bản nào khác ngoài JSON.
+        `;
+
+        const responseSchema = {
+            type: "OBJECT",
+            properties: {
+                "score": { "type": "NUMBER", "description": "The computed philosophical reward score between 0.0 and 1.0." },
+                "explanation": { "type": "STRING", "description": "A short explanation in Vietnamese for the score." }
+            },
+            propertyOrdering: ["score", "explanation"]
+        };
+
+        const responseCard = document.getElementById('resultCard');
+        const scoreDisplay = document.getElementById('rewardScore');
+        const explanationDisplay = document.getElementById('rewardExplanation');
+        const responseTextarea = document.getElementById('responseTextarea');
+        const scoreButton = document.getElementById('scoreButton');
+        const buttonText = document.getElementById('buttonText');
+        const loader = document.getElementById('loader');
+
+        async function fetchWithRetry(url, options, maxRetries = 3) {
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response;
+                } catch (error) {
+                    if (i < maxRetries - 1) {
+                        const delay = Math.pow(2, i) * 1000;
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                    } else {
+                        throw error;
+                    }
+                }
+            }
+        }
+
+        async function getRewardScore() {
+            const userResponse = responseTextarea.value.trim();
+
+            if (!userResponse) {
+                explanationDisplay.textContent = "Vui lòng nhập câu trả lời để chấm điểm.";
+                responseCard.classList.remove('hidden');
+                scoreDisplay.textContent = 'N/A';
+                return;
+            }
+
+            // Hiển thị trạng thái tải
+            scoreButton.disabled = true;
+            buttonText.textContent = "Đang Chấm Điểm...";
+            loader.classList.remove('hidden');
+            responseCard.classList.add('hidden');
+
+            const userQuery = `Hãy chấm điểm (score) cho câu trả lời sau về mặt triết học và sâu sắc:\n\nuser_response: "${userResponse}"`;
+
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: responseSchema
+                }
+            };
+
+            try {
+                const response = await fetchWithRetry(API_URL + apiKey, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                
+                let score, explanation;
+
+                try {
+                    const jsonString = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+                    const parsedJson = JSON.parse(jsonString);
+                    score = parsedJson.score;
+                    explanation = parsedJson.explanation;
+                } catch (e) {
+                    console.error("Lỗi phân tích JSON từ phản hồi của Gemini:", e);
+                    score = 0.0;
+                    explanation = "Lỗi hệ thống trong việc phân tích JSON. Model không trả về cấu trúc chính xác.";
+                }
+
+                // Cập nhật giao diện
+                scoreDisplay.textContent = score.toFixed(2);
+                explanationDisplay.textContent = explanation;
+                responseCard.classList.remove('hidden');
+                
+            } catch (error) {
+                console.error("Lỗi khi gọi Gemini API:", error);
+                scoreDisplay.textContent = 'Lỗi';
+                explanationDisplay.textContent = "Không thể kết nối với API. Vui lòng kiểm tra console log.";
+                responseCard.classList.remove('hidden');
+            } finally {
+                // Kết thúc trạng thái tải
+                scoreButton.disabled = false;
+                buttonText.textContent = "Chấm Điểm Thưởng (Reward Score)";
+                loader.classList.add('hidden');
+            }
+        }
+
+        // Đặt câu trả lời mẫu
+        window.onload = () => {
+             responseTextarea.value = "Ý nghĩa triết học sâu xa của sự phát triển Trí Tuệ Nhân Tạo là gì? Nó đặt ra câu hỏi về bản chất của ý thức, chủ nghĩa duy vật chức năng, và ranh giới giữa sáng tạo nhân tạo và sự sống.";
+        }
+    </script>
+    </body>
+</html>
