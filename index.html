@@ -119,6 +119,14 @@
                  "explanation": "[Giải thích ngắn gọn (bằng tiếng Việt) tại sao văn bản này xứng đáng với điểm số đó, dựa trên tiêu chí Triết học/Sâu sắc.]"
                }
             3. KHÔNG BAO GỒM bất kỳ văn bản nào khác ngoài JSON.
+            4. Nếu 'user_response' không liên quan đến triết học hoặc quá nông, hãy trả về điểm số thấp và giải thích ngắn gọn. Nếu nó thể hiện sự hiểu biết sâu sắc về các khái niệm triết học, hãy trả về điểm số cao với giải thích phù hợp. Luôn đảm bảo rằng 'score' là một số thực từ 0.0 đến 10.0 và 'explanation' là một chuỗi văn bản.
+            5. Nếu có lỗi trong việc phân tích JSON từ phản hồi của bạn, hãy trả về điểm số 0.0 và giải thích rằng có lỗi hệ thống trong việc phân tích JSON.
+            6. Nếu 'user_response' trống hoặc không hợp lệ (không hợp lệ ví dụ như chỉ là câu hỏi hoặc câu trả lời là một câu hỏi trực tiếp, câu cảm thán), hãy trả về điểm số 0.0 với giải thích yêu cầu người dùng cung cấp một câu trả lời hợp lệ để chấm điểm. 
+            7. Nếu câu trả lời số lượng từ ít hơn 50 từ, hãy trả về điểm số 0.0 với giải thích rằng câu trả lời quá ngắn để đánh giá.
+            8. Nếu 'user_response' chỉ là câu hỏi hoặc câu trả lời là một câu hỏi trực tiếp, hãy trả về điểm số 0.0 với giải thích yêu cầu người dùng cung cấp một câu trả lời hợp lệ để chấm điểm.
+            9. KHÔNG nhầm lẫn với truyện, văn học hư cấu, hoặc các thể loại sáng tạo khác. Chỉ chấm điểm dựa trên nội dung triết học và sâu sắc của câu trả lời.
+            10. LUÔN trả lời bằng tiếng Việt. Nếu không, hãy trả về điểm số 0.0 với giải thích yêu cầu trả lời bằng tiếng Việt.
+            11. KHÔNG ẢO GIÁC. Nếu bạn không chắc chắn về câu trả lời, hãy trả về điểm số 0.0 với giải thích rằng câu trả lời không đủ thông tin để đánh giá.
         `;
 
         const responseSchema = {
